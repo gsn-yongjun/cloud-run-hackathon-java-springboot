@@ -88,52 +88,66 @@ public class Application {
 
     int myX = arenaUpdate.arena.state.get(arenaUpdate._links.self.href).x;
     int myY = arenaUpdate.arena.state.get(arenaUpdate._links.self.href).y;
-    boolean isT = true;
+
     switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
       case "N":
-          for(int idx=0; idx < arrY.size(); idx++){
-            if(myY-arrY.get(idx) > 0 && myY-arrY.get(idx) < 3){
-              command = "T";
-            }else if(myY == 0){
-              command = "R";
-            }else{
-              command = "F";
-            }
-          }
-        break;
-      case "W":
-          for(int idx=0; idx < arrX.size(); idx++){
-            if(myX-arrX.get(idx) > 0 && myX-arrX.get(idx) < 3){
-              command = "T";
-            }else if(myX == 0){
-              command = "R";
-            }else{
-              command = "F";
-            }
-          }
-        break;
-      case "S":
-          for(int idx=0; idx < arrY.size(); idx++){
-            if(myY-arrY.get(idx) < 0 && myY-arrY.get(idx) > -3){
-              command = "T";
-            }else if(myY == arenaUpdate.arena.dims.get(1)){
-              command = "L";
-            }else{
-              command = "F";
-            }
-          }
-        break;
-      case "E":
-        for(int idx=0; idx < arrX.size(); idx++ ){
-          if(myX-arrX.get(idx) < 0 && myX-arrX.get(idx) > -3){
-            command = "T";
-          }else if(myX == arenaUpdate.arena.dims.get(0)){
+          if(myY == 0){
             command = "R";
           }else{
             command = "F";
           }
-          break;
+          for(int idx=0; idx < arrY.size(); idx++){
+            if(myY-arrY.get(idx) > 0 && myY-arrY.get(idx) < 3){
+              command = "T";
+            }
+          }
+        break;
+
+      case "W":
+          if(myX == 0){
+            command = "R";
+          }else{
+            command = "F";
+          }
+          for(int idx=0; idx < arrX.size(); idx++){
+            if(myX-arrX.get(idx) > 0 && myX-arrX.get(idx) < 3){
+              command = "T";
+            }
+          }
+        break;
+
+
+      case "S":
+
+          if(myY == arenaUpdate.arena.dims.get(1)){
+            command = "L";
+          }else{
+            command = "F";
+          }
+
+          for(int idx=0; idx < arrY.size(); idx++){
+            if(myY-arrY.get(idx) < 0 && myY-arrY.get(idx) > -3){
+              command = "T";
+            }
+          }
+        break;
+
+
+      case "E":
+        if(myX == arenaUpdate.arena.dims.get(0)){
+          command = "R";
+        }else{
+          command = "F";
         }
+
+        for(int idx=0; idx < arrX.size(); idx++ ){
+          if(myX-arrX.get(idx) < 0 && myX-arrX.get(idx) > -3){
+            command = "T";
+          }
+        }
+
+        break;
+
       default:
         command = "F";
         break;
