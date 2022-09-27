@@ -52,15 +52,22 @@ public class Application {
   public String index() {
     return "Let the battle begin!";
   }
+  
+  static String state = "";
 
   @PostMapping("/**")
   public String index(@RequestBody ArenaUpdate arenaUpdate) {
-    System.out.println(arenaUpdate);
-    String[] commands = new String[]{"F", "R", "L", "T"};
+    
+    System.out.println(arenaUpdate._links.self.href);
+    System.out.println(arenaUpdate.arena.dims);
+    System.out.println(arenaUpdate.arena.state);
+    
+    // String[] commands = new String[]{"F", "R", "L", "T"};
+    String[] commands = new String[]{"T", "R", "L", "T"};
     int i = new Random().nextInt(4);
-    
+
     // TODO add your implementation here to replace the random response. 
-    
+    System.out.println(commands[i]);
     return commands[i];
   }
 
