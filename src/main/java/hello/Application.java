@@ -57,16 +57,38 @@ public class Application {
   @PostMapping("/**")
   public String index(@RequestBody ArenaUpdate arenaUpdate) {
     
+
     System.out.println(arenaUpdate._links.self.href);
     System.out.println(arenaUpdate.arena.dims);
-    System.out.println(arenaUpdate.arena.state);
+    System.out.println(arenaUpdate.arena.state.values());
+    System.out.println(arenaUpdate.arena.state.get("https://foo.com").x);
     
     // String[] commands = new String[]{"F", "R", "L", "T"};
     String[] commands = new String[]{"F", "T", "R", "T", "L", "T"};
+    String command = "F";
     int i = new Random().nextInt(6);
 
+    switch (arenaUpdate.arena.state.get(arenaUpdate._links.self.href).direction) {
+      case "N":
+        System.out.println("North");
+        break;
+      case "W":
+        
+        break;
+      case "S":
+        
+        break;
+      case "E":
+        
+        break;
+    
+      default:
+
+        break;
+    }
     // TODO add your implementation here to replace the random response. 
-    return commands[i];
+    // return commands[i];
+    return "T";
   }
 
 }
