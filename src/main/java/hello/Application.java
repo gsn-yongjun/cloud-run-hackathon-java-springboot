@@ -63,11 +63,10 @@ public class Application {
     System.out.println(arenaUpdate.arena.state);
     
     // String[] commands = new String[]{"F", "R", "L", "T"};
-    String[] commands = new String[]{"F", "R", "L", "T"};
-    int i = new Random().nextInt(4);
+    String[] commands = new String[]{"F", "T", "R", "T", "L", "T"};
+    int i = new Random().nextInt(6);
 
     // TODO add your implementation here to replace the random response. 
-    System.out.println(commands[i]);
     return commands[i];
   }
 
