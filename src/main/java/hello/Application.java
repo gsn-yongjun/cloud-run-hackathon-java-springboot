@@ -53,7 +53,6 @@ public class Application {
     return "Let the battle begin!";
   }
   
-  static String state = "";
 
   @PostMapping("/**")
   public String index(@RequestBody ArenaUpdate arenaUpdate) {
