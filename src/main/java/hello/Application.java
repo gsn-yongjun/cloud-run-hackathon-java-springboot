@@ -62,12 +62,12 @@ public class Application {
 		PlayerState selfState = arenaUpdate.arena.state.get(selfKey);
 
 		// If you got hit, move away
-		if (selfState.wasHit) {
-			String[] commands = new String[] { "F", "R", "L" };
-			Random r = new Random();
-			int i = r.nextInt(3);
-			return commands[i];
-		}
+		// if (selfState.wasHit) {
+		// 	String[] commands = new String[] { "F", "R", "L" };
+		// 	Random r = new Random();
+		// 	int i = r.nextInt(3);
+		// 	return commands[i];
+		// }
 
 		// Create Iterator
 		Iterator<Map.Entry<String, PlayerState>> stateIt = arenaUpdate.arena.state.entrySet().iterator();
