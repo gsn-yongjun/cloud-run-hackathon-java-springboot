@@ -1,16 +1,15 @@
 package hello;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 @SpringBootApplication
 @RestController
@@ -58,125 +57,200 @@ public class Application {
 
 	@PostMapping("/**")
 	public String index(@RequestBody ArenaUpdate arenaUpdate) {
-		if (canThrow(arenaUpdate)) {
+		System.out.println(arenaUpdate);
+		System.out.println("Dim: " + arenaUpdate.arena.dims.toString());
+		Map<String, PlayerState> state = arenaUpdate.arena.state;
+
+		int dim_x = arenaUpdate.arena.dims.get(0);
+		int dim_y = arenaUpdate.arena.dims.get(1);
+
+		int my_x = 0;
+		int my_y = 0;
+		String my_dir = "N";
+		boolean my_washit = false;
+
+		Set<PlayerState> nsSet = new HashSet<PlayerState>();
+		Set<PlayerState> weSet = new HashSet<PlayerState>();
+
+		System.out.println("Player count: " + state.size());
+
+		for (String str : state.keySet()) {
+			PlayerState player = state.get(str);
+			String me = "";
+			if (str.contains("so6zjyq3bq")) {
+				my_x = player.x;
+				my_y = player.y;
+				my_dir = player.direction;
+				my_washit = player.wasHit;
+				me = "ME->";
+			}
+
+			if (my_y == player.y && Math.abs(my_x - player.x) <= 3) {
+				nsSet.add(player);
+			}
+
+			if (my_x == player.x && Math.abs(my_y - player.y) <= 3) {
+				weSet.add(player);
+			}
+
+			System.out.println(me + "URL= " + str + ", dir=" + player.direction + ", x=" + player.x + ", y=" + player.y
+					+ ", washit=" + player.wasHit + ", score=" + player.score);
+		}
+		System.out.println("My stats are x,y,dir,washit: " + my_x + ", " + my_y + ", " + my_dir + ", " + my_washit);
+
+		boolean canThrow = false;
+
+		for (String str : state.keySet()) {
+
+			PlayerState player = state.get(str);
+
+			if (!str.contains("so6zjyq3bq")) {
+//    		PlayerState player = state.get(str);
+				int x1 = player.x;
+				int y1 = player.y;
+//    		double distance_sq = Math.pow( Math.abs(my_x-x1), 2) + Math.pow(Math.abs(my_y- y1), 2);
+//    		double distance = Math.sqrt(distance_sq);
+//    		System.out.println("Opponent in range, " + distance + ", " + str + " , Throw is set");
+//    		if(distance<=4) {
+//    			canThrow=true;
+//    			
+//    		}
+
+				if (my_dir.equals("E") && my_y == y1 && x1 - my_x <= 3 && (x1 > my_x)) {
+					System.out.println("Opponent in range (" + x1 + "," + y1 + "), me (" + my_x + "," + my_y + ") "
+							+ str + " , Throw is set");
+					canThrow = true;
+					break;
+				}
+				if (my_dir.equals("W") && my_y == y1 && (my_x - x1) <= 3 & (my_x > x1)) {
+					System.out.println("Opponent in range (" + x1 + "," + y1 + "), me (" + my_x + "," + my_y + ") "
+							+ str + " , Throw is set");
+					canThrow = true;
+					break;
+				}
+				if (my_dir.equals("N") && my_x == x1 && my_y - y1 <= 3 && (my_y > y1)) {
+					System.out.println("Opponent in range (" + x1 + "," + y1 + "), me (" + my_x + "," + my_y + ") "
+							+ str + " , Throw is set");
+					canThrow = true;
+					break;
+				}
+				if (my_dir.equals("S") && my_x == x1 && y1 - my_y <= 3 && (y1 > my_y)) {
+					System.out.println("Opponent in range (" + x1 + "," + y1 + "), me (" + my_x + "," + my_y + ") "
+							+ str + " , Throw is set");
+					canThrow = true;
+					break;
+				}
+			}
+		}
+
+		String[] commands = new String[] { "F", "R", "L", "T" };
+
+		if (my_washit) {
+			String[] move_commands = new String[] { "F", "R", "L" };
+			int i = new Random().nextInt(3);
+			System.out.println("washit true, random action: " + move_commands[i]);
+			return move_commands[i];
+		}
+
+		boolean[] luck = new boolean[] { false, false, false, false, false, false, true };
+		int randLuck = new Random().nextInt(5);
+		boolean randomReturn = luck[randLuck];
+		if (randomReturn) {
+			int i = new Random().nextInt(4);
+			System.out.println("randomReturn: " + randomReturn + ", random move: " + commands[i]);
+			return commands[i];
+		} else {
+
+			System.out.println("randomReturn: " + randomReturn + ", standard logic.");
+		}
+
+		if (canThrow) {
+			System.out.println("Throw Water");
 			return "T";
 		} else {
-			return move(arenaUpdate);
-		}
-	}
 
-	private String move(ArenaUpdate arenaUpdate) {
-		if (areEnemiesToTheLeft(arenaUpdate)) {
-			return "L";
-		}
-		if (areEnemiesToTheRight(arenaUpdate)) {
-			return "R";
-		}
-		if (areEnemiesToTheBack(arenaUpdate)) {
-			return "L";
-		} else {
-			return "F";
-		}
-	}
+			String move = "F";
 
-	private boolean areEnemiesToTheBack(ArenaUpdate arenaUpdate) {
+			/* look for opp in 4 directions */
+//    	if( my_dir.equals("N"))
+			for (PlayerState player : nsSet) {
+				if (my_dir.equals("N") && player.x < my_x) {
+					move = "L";
+					System.out.println("Turning L towards player (" + player.x + "," + player.y + ")");
+					break;
+				}
+				if (my_dir.equals("N") && my_x < player.x) {
+					move = "R";
+					System.out.println("Turning R towards player (" + player.x + "," + player.y + ")");
+					break;
+				}
 
-		PlayerState self = arenaUpdate.arena.state.entrySet().stream()
-				.filter(x -> x.getKey().equals(arenaUpdate._links.self.href)).findFirst().get().getValue();
+				if (my_dir.equals("S") && player.x < my_x) {
+					move = "R";
+					System.out.println("Turning R towards player (" + player.x + "," + player.y + ")");
+					break;
+				}
+				if (my_dir.equals("S") && player.x > my_x) {
+					move = "L";
+					System.out.println("Turning L towards player (" + player.x + "," + player.y + ")");
+					break;
+				}
+			}
 
-		return arenaUpdate.arena.state.entrySet().stream().filter(x -> !x.getKey().equals(arenaUpdate._links.self.href))
-				.anyMatch(x -> isEnemyToTheBack(self, x.getValue()));
-	}
+			// return only if there is a change
+			if (!move.equals("F")) {
+				return move;
+			}
 
-	private boolean isEnemyToTheBack(PlayerState self, PlayerState opponent) {
+			/* no opponent found, default is F */
 
-		switch (self.direction) {
-		case "N":
-			return self.x == opponent.x && self.y < opponent.y && self.y + 3 >= opponent.y;
-		case "S":
-			return self.x == opponent.x && self.y > opponent.y && self.y - 3 <= opponent.y;
-		case "E":
-			return self.x > opponent.x && self.x + 3 <= opponent.x && self.y == opponent.y;
-		case "W":
-			return self.x < opponent.x && self.x + 3 >= opponent.x && self.y == opponent.y;
-		default:
-			System.out.println("WARNING unknown direction: " + self.direction);
-			return false;
-		}
-	}
+			System.out.println("No opp in range, deciding next move.");
+			move = "F";
 
-	private boolean areEnemiesToTheRight(ArenaUpdate arenaUpdate) {
+			// moving Southwards
+			if (my_dir.equals("S") && dim_y - my_y <= 3) {
+				if (dim_x / 2 > my_x) {
+					move = "L";
+				} else {
+					move = "R";
+				}
+				System.out.println("[S]Move set to: " + move);
+			}
 
-		PlayerState self = arenaUpdate.arena.state.entrySet().stream()
-				.filter(x -> x.getKey().equals(arenaUpdate._links.self.href)).findFirst().get().getValue();
+			// moving Northwards
+			if (my_dir.equals("N") && my_y <= 3) {
+				if (dim_x / 2 > my_x) {
+					move = "R";
+				} else {
+					move = "L";
+				}
+				System.out.println("[N]Move set to: " + move);
+			}
 
-		return arenaUpdate.arena.state.entrySet().stream().filter(x -> !x.getKey().equals(arenaUpdate._links.self.href))
-				.anyMatch(x -> isEnemyToTheRight(self, x.getValue()));
-	}
+			// moving East
+			if (my_dir.equals("E") && dim_x - my_x <= 3) {
+				if (dim_y / 2 > my_y) {
+					move = "R";
+				} else {
+					move = "L";
+				}
+				System.out.println("[E]Move set to: " + move);
+			}
 
-	private boolean isEnemyToTheRight(PlayerState self, PlayerState opponent) {
-		switch (self.direction) {
-		case "E":
-			return self.x.equals(opponent.x) && self.y > opponent.y && self.y + 3 <= opponent.y;
-		case "W":
-			return self.x.equals(opponent.x) && self.y < opponent.y && self.y - 3 >= opponent.y;
-		case "N":
-			return self.x > opponent.x && self.x + 3 <= opponent.x && self.y == opponent.y;
-		case "S":
-			return self.x > opponent.x && self.x - 3 <= opponent.x && self.y == opponent.y;
-		default:
-			System.out.println("WARNING unknown direction: " + self.direction);
-			return false;
-		}
-	}
+			// moving West
+			if (my_dir.equals("W") && my_x <= 3) {
+				if (dim_y / 2 > my_y) {
+					move = "L";
+				} else {
+					move = "R";
+				}
+				System.out.println("[W]Move set to: " + move);
+			}
 
-	private boolean areEnemiesToTheLeft(ArenaUpdate arenaUpdate) {
-		PlayerState self = arenaUpdate.arena.state.entrySet().stream()
-				.filter(x -> x.getKey().equals(arenaUpdate._links.self.href)).findFirst().get().getValue();
-
-        System.out.println("areEnemiesToTheLeft" + self);
-
-		return arenaUpdate.arena.state.entrySet().stream().filter(x -> !x.getKey().equals(arenaUpdate._links.self.href))
-				.anyMatch(x -> isEnemyToTheLeft(self, x.getValue()));
-	}
-
-	private boolean isEnemyToTheLeft(PlayerState self, PlayerState opponent) {
-		switch (self.direction) {
-		case "E":
-			return self.x.equals(opponent.x) && self.y > opponent.y && self.y - 3 <= opponent.y;
-		case "W":
-			return self.x.equals(opponent.x) && self.y < opponent.y && self.y + 3 >= opponent.y;
-		case "N":
-			return self.x > opponent.x && self.x - 3 <= opponent.x && self.y == opponent.y;
-		case "S":
-			return self.x > opponent.x && self.x + 3 <= opponent.x && self.y == opponent.y;
-		default:
-			System.out.println("WARNING unknown direction: " + self.direction);
-			return false;
-		}
-	}
-
-	private boolean canThrow(ArenaUpdate arenaUpdate) {
-		PlayerState self = arenaUpdate.arena.state.entrySet().stream()
-				.filter(x -> x.getKey().equals(arenaUpdate._links.self.href)).findFirst().get().getValue();
-
-		return arenaUpdate.arena.state.entrySet().stream().filter(x -> !x.getKey().equals(arenaUpdate._links.self.href))
-				.anyMatch(x -> isInFront(self, x.getValue()));
-	}
-
-	private boolean isInFront(PlayerState self, PlayerState opponent) {
-		switch (self.direction) {
-		case "N":
-			return self.x == opponent.x && self.y > opponent.y && self.y - 3 <= opponent.y;
-		case "S":
-			return self.x == opponent.x && self.y < opponent.y && self.y + 3 >= opponent.y;
-		case "W":
-			return self.x > opponent.x && self.x - 3 <= opponent.x && self.y == opponent.y;
-		case "E":
-			return self.x > opponent.x && self.x + 3 <= opponent.x && self.y == opponent.y;
-		default:
-			System.out.println("WARNING unknown direction: " + self.direction);
-			return false;
+			System.out.println("Final Move: " + move);
+			return move;
+//    	int i = new Random().nextInt(4);
+//    	return commands[i];
 		}
 	}
 
