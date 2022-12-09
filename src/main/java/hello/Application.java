@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Iterator;
 
 @SpringBootApplication
 @RestController
@@ -55,8 +57,68 @@ public class Application {
 	@PostMapping("/**")
 	public String index(@RequestBody ArenaUpdate arenaUpdate) {
 
-		return "T";
+		// Get self state
+		String selfKey = arenaUpdate._links.self.href;
+		PlayerState selfState = arenaUpdate.arena.state.get(selfKey);
 
+		// If you got hit, move away
+		if (selfState.wasHit) {
+			String[] commands = new String[] { "F", "R", "L", "F" };
+			Random r = new Random();
+			int i = r.nextInt(4);
+			return commands[i];
+		}
+
+		// Create Iterator
+		Iterator<Map.Entry<String, PlayerState>> stateIt = arenaUpdate.arena.state.entrySet().iterator();
+
+		// Iterate through map to see other player positions
+		while (stateIt.hasNext()) {
+			Map.Entry<String, PlayerState> playerState = stateIt.next();
+
+			// Skip if it's your own player
+			if (playerState.getKey().equals(selfKey)) {
+				continue;
+			}
+
+			// Check if player is in your row/col
+			int posX = playerState.getValue().x;
+			int posY = playerState.getValue().y;
+
+			// Same Column(x)
+			if ((posX == selfState.x) && (Math.abs(posY - selfState.y) <= 3)) {
+				// Check if same direction
+				if (selfState.direction.equals("N")) {
+					if (posY < selfState.y) {
+						// Shoot water
+						return "T";
+					}
+				} else if (selfState.direction.equals("S")) {
+					if (posY > selfState.y) {
+						return "T";
+					}
+				}
+			}
+
+			// Same Row(y)
+			if ((posY == selfState.y) && (Math.abs(posX - selfState.x) <= 3)) {
+				// Check if same direction
+				if (selfState.direction.equals("W")) {
+					if (posX < selfState.x) {
+						return "T";
+					}
+				} else if (selfState.direction.equals("E")) {
+					if (posX > selfState.x) {
+						return "T";
+					}
+				}
+			}
+		}
+
+		// Do something random if none of the conditions match
+		String[] commands = new String[] { "F", "R", "L", "F" };
+		Random r = new Random();
+		int i = r.nextInt(4);
+		return commands[i];
 	}
-
 }
